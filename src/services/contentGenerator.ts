@@ -1,27 +1,26 @@
-export async function generateContent(tags: string[] = []) {
+export async function generateContent(tags: string[]) {
   try {
-    const response = await fetch('https://syntech-copyforge-server-v2.vercel.app/api/generate', {
+    const response = await fetch('https://syntechgeneratorapi--lemon.vercel.app/generate', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ tags }),
+      body: JSON.stringify({ tags })
     });
 
     if (!response.ok) {
-      throw new Error(`❌ Server returned ${response.status}`);
+      throw new Error(`Server returned ${response.status}`);
     }
 
     const data = await response.json();
 
-    // Defensive check in case OpenAI response is malformed
-    if (!data?.choices?.[0]?.message?.content) {
-      throw new Error('No content returned from OpenAI.');
+    if (!data.choices || !data.choices[0]?.message?.content) {
+      throw new Error('Invalid response from OpenAI');
     }
 
     return data.choices[0].message.content;
-  } catch (error) {
-    console.error('[generateContent error]', error);
+  } catch (error: any) {
+    console.error("Error generating content:", error.message);
     throw error;
   }
 }
