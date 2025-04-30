@@ -9,9 +9,10 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { X, Plus } from "lucide-react";
 
 const topicOptions = [
   { value: "scope3", label: "Scope 3 Emissions" },
@@ -36,6 +37,7 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
 }) => {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [mainTopic, setMainTopic] = useState<string>("");
+  const [tagInput, setTagInput] = useState<string>("");
   const { toast } = useToast();
 
   const handleTopicChange = (value: string) => {
@@ -45,12 +47,45 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
     }
   };
 
-  const handleTopicCheckboxChange = (topic: string, checked: boolean) => {
-    if (checked) {
-      setSelectedTopics(prev => [...prev, topic]);
+  const handleAddTag = () => {
+    // Find the matching topic option
+    const matchingTopic = topicOptions.find(
+      topic => topic.value.toLowerCase() === tagInput.toLowerCase() || 
+              topic.label.toLowerCase() === tagInput.toLowerCase()
+    );
+    
+    if (matchingTopic && !selectedTopics.includes(matchingTopic.value)) {
+      setSelectedTopics(prev => [...prev, matchingTopic.value]);
+      setTagInput("");
+    } else if (matchingTopic) {
+      toast({
+        title: "Topic already selected",
+        description: "This topic has already been added to the list.",
+        variant: "destructive"
+      });
     } else {
-      setSelectedTopics(prev => prev.filter(t => t !== topic));
+      toast({
+        title: "Invalid topic",
+        description: "Please enter a valid topic from the suggestions.",
+        variant: "destructive"
+      });
     }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && tagInput.trim() !== '') {
+      e.preventDefault();
+      handleAddTag();
+    }
+  };
+
+  const handleRemoveTag = (topic: string) => {
+    setSelectedTopics(prev => prev.filter(t => t !== topic));
+  };
+
+  const getLabelForValue = (value: string) => {
+    const topic = topicOptions.find(t => t.value === value);
+    return topic ? topic.label : value;
   };
 
   const handleSubmit = () => {
@@ -67,9 +102,9 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Generate Social Media Content</CardTitle>
+    <Card className="w-full border-0 shadow-lg">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-medium text-[#1C242B]">Generate Social Media Content</CardTitle>
         <CardDescription>
           Select your main topic and any additional topics to include in your social media content.
         </CardDescription>
@@ -78,7 +113,7 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
         <div className="space-y-2">
           <Label htmlFor="main-topic">Main Topic</Label>
           <Select value={mainTopic} onValueChange={handleTopicChange}>
-            <SelectTrigger id="main-topic" className="w-full">
+            <SelectTrigger id="main-topic" className="w-full border-[#F2F2F2]">
               <SelectValue placeholder="Select main topic" />
             </SelectTrigger>
             <SelectContent>
@@ -93,30 +128,49 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
 
         <div className="space-y-2">
           <Label>Additional Topics (Optional)</Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {topicOptions.map(topic => (
-              <div key={topic.value} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`topic-${topic.value}`}
-                  checked={selectedTopics.includes(topic.value)}
-                  onCheckedChange={(checked) => 
-                    handleTopicCheckboxChange(topic.value, checked as boolean)
-                  }
-                />
-                <label 
-                  htmlFor={`topic-${topic.value}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          <div className="flex flex-wrap gap-2 mb-2">
+            {selectedTopics.map(topic => (
+              <div 
+                key={topic} 
+                className="inline-flex items-center bg-[#F2F2F2] text-[#1C242B] py-1 px-3 rounded-full text-sm"
+              >
+                {getLabelForValue(topic)}
+                <button 
+                  onClick={() => handleRemoveTag(topic)} 
+                  className="ml-1 p-0.5 hover:bg-[#303030] hover:text-white rounded-full"
                 >
-                  {topic.label}
-                </label>
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
             ))}
+          </div>
+          
+          <div className="flex gap-2">
+            <Input 
+              placeholder="Type a topic and press Enter" 
+              value={tagInput} 
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-1"
+            />
+            <Button 
+              onClick={handleAddTag} 
+              variant="outline" 
+              className="shrink-0" 
+              disabled={tagInput.trim() === ""}
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          </div>
+          
+          <div className="text-xs text-muted-foreground mt-1">
+            Suggestions: Scope 3 Emissions, Carbon Reduction, Made in UK, Sustainable Construction...
           </div>
         </div>
 
         <Button 
           onClick={handleSubmit} 
-          className="w-full bg-syntech-green hover:bg-syntech-blue"
+          className="w-full bg-[#94C11F] hover:bg-[#1C242B] transition-colors"
           disabled={isLoading}
         >
           {isLoading ? "Generating..." : "Generate Content"}

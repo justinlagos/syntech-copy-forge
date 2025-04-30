@@ -25,16 +25,16 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-syntech-gray">
+    <div className="min-h-screen bg-white">
       <Header />
 
-      <main className="container mx-auto py-8 px-4">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <section className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-syntech-blue mb-4">
+      <main className="container mx-auto py-12 px-4">
+        <div className="max-w-3xl mx-auto space-y-8">
+          <section className="text-center mb-12">
+            <h2 className="text-3xl font-medium text-[#1C242B] mb-4">
               Social Media Content Generator
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-[#303030] max-w-2xl mx-auto">
               Generate professional, on-brand social media content for LinkedIn and Instagram 
               that highlights Syntech Biofuel's sustainability initiatives and innovations.
             </p>
@@ -51,8 +51,8 @@ const Index = () => {
         </div>
       </main>
 
-      <footer className="bg-syntech-blue text-white py-4 mt-12">
-        <div className="container mx-auto text-center text-sm">
+      <footer className="bg-[#F2F2F2] py-6 mt-12">
+        <div className="container mx-auto text-center text-sm text-[#1C242B]">
           <p>© {new Date().getFullYear()} Syntech Biofuel. All rights reserved.</p>
         </div>
       </footer>
