@@ -48,27 +48,20 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
   };
 
   const handleAddTag = () => {
-    // Find the matching topic option
-    const matchingTopic = topicOptions.find(
-      topic => topic.value.toLowerCase() === tagInput.toLowerCase() || 
-              topic.label.toLowerCase() === tagInput.toLowerCase()
-    );
-    
-    if (matchingTopic && !selectedTopics.includes(matchingTopic.value)) {
-      setSelectedTopics(prev => [...prev, matchingTopic.value]);
-      setTagInput("");
-    } else if (matchingTopic) {
-      toast({
-        title: "Topic already selected",
-        description: "This topic has already been added to the list.",
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Invalid topic",
-        description: "Please enter a valid topic from the suggestions.",
-        variant: "destructive"
-      });
+    // Allow any custom tag input, just check for duplicates
+    if (tagInput.trim() !== '') {
+      const newTag = tagInput.trim();
+      
+      if (!selectedTopics.includes(newTag)) {
+        setSelectedTopics(prev => [...prev, newTag]);
+        setTagInput("");
+      } else {
+        toast({
+          title: "Topic already added",
+          description: "This topic has already been added to the list.",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -84,21 +77,25 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
   };
 
   const getLabelForValue = (value: string) => {
+    // Try to find a matching predefined topic label
     const topic = topicOptions.find(t => t.value === value);
+    // Return the label if found, otherwise return the value itself (custom tag)
     return topic ? topic.label : value;
   };
 
   const handleSubmit = () => {
-    if (selectedTopics.length === 0) {
+    if (!mainTopic) {
       toast({
-        title: "Please select at least one topic",
-        description: "You need to select at least one topic to generate content.",
+        title: "Main topic required",
+        description: "Please select a main topic to generate content.",
         variant: "destructive"
       });
       return;
     }
     
-    onGenerate(selectedTopics);
+    // Generate content with only the main topic if no additional topics are selected
+    const topicsToSubmit = selectedTopics.length > 0 ? selectedTopics : [mainTopic];
+    onGenerate(topicsToSubmit);
   };
 
   return (
@@ -106,7 +103,7 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
       <CardHeader className="pb-2">
         <CardTitle className="text-xl font-medium text-[#1C242B]">Generate Social Media Content</CardTitle>
         <CardDescription>
-          Select your main topic and any additional topics to include in your social media content.
+          Select your main topic and add any additional topics to customize your social media content.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -147,7 +144,7 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
           
           <div className="flex gap-2">
             <Input 
-              placeholder="Type a topic and press Enter" 
+              placeholder="Type any topic and press Enter" 
               value={tagInput} 
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -164,7 +161,7 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
           </div>
           
           <div className="text-xs text-muted-foreground mt-1">
-            Suggestions: Scope 3 Emissions, Carbon Reduction, Made in UK, Sustainable Construction...
+            Enter any topics relevant to your content. You can add custom topics beyond the suggestions.
           </div>
         </div>
 

@@ -5,11 +5,13 @@ import ContentGeneratorForm from '@/components/ContentGeneratorForm';
 import ContentDisplay, { ContentPair } from '@/components/ContentDisplay';
 import { Toaster } from "@/components/ui/toaster";
 import { generateContent } from '@/services/contentGenerator';
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [generatedContent, setGeneratedContent] = useState<ContentPair[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasGenerated, setHasGenerated] = useState<boolean>(false);
+  const { toast } = useToast();
 
   const handleGenerateContent = async (topics: string[]) => {
     setIsLoading(true);
@@ -17,8 +19,17 @@ const Index = () => {
       const content = await generateContent(topics);
       setGeneratedContent(content);
       setHasGenerated(true);
+      toast({
+        title: "Content generated",
+        description: "Your social media content has been created successfully.",
+      });
     } catch (error) {
       console.error('Error generating content:', error);
+      toast({
+        title: "Error generating content",
+        description: "There was a problem generating your content. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
